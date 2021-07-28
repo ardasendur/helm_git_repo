@@ -1,0 +1,250 @@
+- - ***HELM NOTES**
+- Helm kubernetess package manager
+    
+- Helm composed of 4 main component : Client, Chart,Repository and Release
+    
+- Helm v2 and v3 has different architecture.
+    
+- Helm v2 has tiller service but v3 has RBAC.
+    
+
+* * *
+
+**Helm Repository**
+Search chart inside hub
+helm search hub
+helm search hub &lt;chart_name&gt;
+
+helm seach repo &lt;repo_name&gt;
+Ex : helm search repo stable
+
+**Note**: If you want to search inside specific repository, you need to add
+helm repo add stable &lt;REPO_URL&gt;
+Ex: helm repo add stable https://charts.helm.sh/stable
+helm repo list
+To search specific chart inside spefici repositroy
+Ex : helm search repo stable/mysql
+Update repository:
+helm repo update
+
+**Helm Chart Installation**
+helm install &lt;chart_name&gt;
+
+**Helm Create Chart**
+Creating chart from strach
+
+helm create my-chart
+
+output: charts Chart.yaml templates values.yaml
+
+**Helm Built-in Object**
+
+**[https://helm.sh/docs/chart\_template\_guide/builtin_objects/](https://helm.sh/docs/chart_template_guide/builtin_objects/)**
+
+Ex:  {{ .Release.Name }}
+
+helm install &lt;release_name &gt;
+
+helm get manifest &lt;release_name&gt;
+
+1.  1.  Read value for templates
+        1.  helm install --debug  --dry-run firstdryrun ./mychar
+
+**Helm Template Function**
+
+You can find a function from below described page
+
+**http://masterminds.github.io/sprig/**
+
+**  Ex: **
+
+**     {{ Function_name .Values.x }}**
+
+**      {{ upper .Values.infra.region }}**
+
+**Helm Template Pipeline and Default value**
+
+Pipeline example:
+
+{{  .Values.infra.region || upper || quote }}
+
+Default example:
+
+{{  .Values.contact || default  "test" || quote }}
+
+**Helm Flow Control If-Else**
+
+{{ if pipeline }}
+
+#Do something
+
+{{ else if pipeline }}
+
+#Do something
+
+{{ else }}
+
+#Default
+
+{{ end }}
+
+{{-  if  eq Values.infra.region "us-ea" }}
+
+ha: true
+
+{{\- end }}
+
+**NOTE :**
+
+**        "-" remove the new line  don't forget this **
+
+**     Helm Defining scope using with**
+
+**      values.yaml**
+
+tags:
+
+machine:  "abxc"
+
+racks: "test"
+
+{{\- with .Values.tags }}
+
+Machine: {{ .machine }}
+
+Racks: {{ .racks }}
+
+{{\- end }}
+
+**    NOTE: helm build in object cannot be used inside with for instance: &lt;RELEASE_NAME&gt; **
+
+**   RANGE**
+
+looping provide "range"
+
+values.yaml
+
+Langused:
+
+\- Python
+
+\- Ruby
+
+\- Java
+
+** Template Variables **
+
+{{\- $relname :=.Release.Name  -}}
+
+**Include keyword**
+
+Provide reusibility
+
+{{\- define  "my-chart-labels"}}
+
+labels:
+
+date: "122344"
+
+name: test
+
+{{ -end }}
+
+Usage:
+
+{{-template "my-chart-labels"  }}
+
+\*\*Include Scope \*\*
+
+Two ways of including template :
+
+1.  Using template keyword
+2.  Using include  keyword
+
+\*\*NOTES \*\*
+
+Template folder includes one NOTES.txt file
+
+Normal template syntax is available inside NOTES.txt
+
+You can use built-in object inside NOTES.txt
+
+**SUB-CHARTS**
+
+You can create new chart inside chart folder by using helm create "sub-chart" then you can  install this chart helm install sub-chart ./mycarth/charths/sub-chart/ .
+
+you can easily access the values from subchart inside values.yaml
+
+**Repository & Registry**
+
+Can be hosted in : 
+
+      \- aws s3 bucket
+
+     -  github pages
+
+     \- google compute cloud bucket
+
+     \- own web server
+
+    Chartmuseum installation - > 
+
+      helm repo. add mychartmuesumrepo &lt;REPO_URL&gt;
+
+      helm repo list
+
+     helm repo search 
+
+     helm package  repotest/.  -> create tar file
+
+    **ardasendur@Arda-MacBook-Pro Desktop % helm package my-chart**
+
+**    Successfully packaged chart and saved it to: /Users/ardasendur/Desktop/my-chart-**      0.1.0.tgz
+
+    Send chart for repository 
+
+    curl  --data-binary  ""my-chart-0.1.0.tgz" "&lt;REPO_URL&gt;" 
+
+    helm repo update
+
+    helm search repo mychartmuseum
+
+**    Maintain of chart version:**
+
+- [ ]       Navigate Chart.yaml
+- [ ]       Manipulate version 
+- [ ]       Helm package my-chart/   
+
+**Helm push plugin **
+
+helm plugin install https://github.com/chartmuseum/helm-push
+Downloading and installing helm-push v0.4.0 ...
+https://github.com/chartmuseum/helm-push/releases/download/v0.4.0/helm-push\_0.4.0\_darwin_amd64.tar.gz
+
+To list helm plugin :
+
+-  helm plugin list 
+-  helm  package &lt;chart_name&gt;
+- helm push &lt;package_output&gt; &lt;repository&gt;
+
+    helm repo add --username  &lt;username&gt; --password &lt;password&gt;   &lt;access_toke &gt;
+
+**Helm with github-repository**
+
+helm package &lt;chart_name&gt;
+
+helm repo index .
+
+git add .
+
+git commit and push
+
+https://github.com/ardasendur/helm\_git\_repo
+
+**TESTING & VERIFICATION**
+
+helm lint &lt;release_name&gt;
+
+helm test
+
+helm status &lt;release_name&gt;
