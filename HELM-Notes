@@ -248,3 +248,4 @@ helm lint &lt;release_name&gt;
 helm test
 
 helm status &lt;release_name&gt;
+helm pull stable/mysql --untar
